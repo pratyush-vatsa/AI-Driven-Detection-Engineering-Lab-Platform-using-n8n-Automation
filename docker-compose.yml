@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  metasploitable:
+    image: tleemcjr/metasploitable2
+    container_name: metasploitable
+    networks:
+      pentest-net:
+        ipv4_address: 192.168.100.10
+    tty: true
+
+  kali:
+    build:
+      context: .
+      dockerfile: Dockerfile.kali
+    container_name: kali
+    stdin_open: true
+    tty: true
+    networks:
+      pentest-net:
+        ipv4_address: 192.168.100.20
+    command: sleep infinity
+    volumes:
+      - kali_root_data:/root/
+    ports:
+      - "8834:8834" # Keep this for Nessus
+    cap_add:        # <--- ADD THIS SECTION
+      - NET_RAW      # <--- Raw socket access for Nmap
+      - NET_ADMIN    # <--- Broad network administration capabilities, often needed for security tools
+
+  n8n:
+    build:
+      context: .
+      dockerfile: Dockerfile.n8n
+    container_name: n8n
+    ports:
+      - "5678:5678"
+    networks:
+      - pentest-net
+    environment:
+      - GENERIC_TIMEZONE=Asia/Kolkata
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=admin123
+      - N8N_DATA_FOLDER=/home/node/.n8n
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - /var/run/docker.sock:/var/run/docker.sock
+    user: root
+
+volumes:
+  n8n_data:
+  kali_root_data:
+
+networks:
+  pentest-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24

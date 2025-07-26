@@ -1,0 +1,25 @@
+# Dockerfile.n8n
+FROM n8nio/n8n:latest
+
+USER root
+
+# Install necessary packages for Docker CLI using apk
+RUN apk add --no-cache \
+    curl \
+    ca-certificates \
+    openssl \
+    gnupg \
+    jq \
+    && echo "https://dl-cdn.alpinelinux.org/alpine/v3.18/community" >> /etc/apk/repositories \
+    && apk update \
+    && apk add --no-cache docker-cli
+
+# --- REVISED XML2JS INSTALLATION METHOD ---
+# Install xml2js globally.
+# Ensure the NODE_PATH environment variable is set so Node.js can find global modules.
+# npm's global bin usually goes to /usr/local/bin, and modules to /usr/local/lib/node_modules
+RUN npm install -g xml2js
+ENV NODE_PATH=/usr/local/lib/node_modules:${NODE_PATH}
+
+# Switch back to the n8n user
+USER node
