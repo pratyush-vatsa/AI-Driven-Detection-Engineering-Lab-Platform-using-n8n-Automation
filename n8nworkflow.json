@@ -1,0 +1,457 @@
+{
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "scan",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -3536,
+          1472
+        ],
+        "id": "956ba056-ec27-4766-a4ac-50c302e43a6e",
+        "name": "Start Scan Trigger",
+        "webhookId": "fcd8cd60-4f8d-475d-9e05-8e766c3b810f"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4b310bdb-c75c-4f8d-adc4-0bdd1a42f754",
+                "name": "targetIp",
+                "value": "={{ $json.body.target }}",
+                "type": "string"
+              },
+              {
+                "id": "5b781854-aed4-4365-a06f-d43daa17b02e",
+                "name": "scanType",
+                "value": "={{ $json.body.scanType }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -3328,
+          1472
+        ],
+        "id": "d548d949-b61c-4c07-a3b6-8ff0a66c7f2b",
+        "name": "Extract Inputs"
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  },
+                  "conditions": [
+                    {
+                      "id": "c0622a59-507c-40f8-bb7d-207a22b95299",
+                      "leftValue": "={{ $json.scanType }}",
+                      "rightValue": "nmap",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.scanType }}",
+                      "rightValue": "nessus_basic",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "id": "f776a4f8-10a9-4232-83eb-e69fcbfcb714"
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  },
+                  "conditions": [
+                    {
+                      "id": "3d08bb9b-9255-4e7b-8c0c-0ccdf453daa9",
+                      "leftValue": "={{ $json.scanType }}",
+                      "rightValue": "Nessus Advanced",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  },
+                  "conditions": [
+                    {
+                      "id": "b82959ff-4e89-4946-ab56-0f27b0be5b48",
+                      "leftValue": "={{ $json.scanType }}",
+                      "rightValue": "Nessus Web Application",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2,
+        "position": [
+          -3104,
+          1440
+        ],
+        "id": "4d6c5f16-0441-42f1-9cad-102b92a032ce",
+        "name": "Route Scan Type"
+      },
+      {
+        "parameters": {
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "text/markdown"
+                }
+              ]
+            }
+          }
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          -224,
+          720
+        ],
+        "id": "a5f9bbcc-3421-43be-adf6-f61691c53936",
+        "name": "Respond to Webhook5"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "e6d275af-6697-4f24-8358-63fa951f00aa",
+                "name": "xml",
+                "value": "={{ $json.stdout }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -1648,
+          720
+        ],
+        "id": "a10b4f96-fd60-4178-a2c4-62a8b9c30bb6",
+        "name": "Edit Fields"
+      },
+      {
+        "parameters": {
+          "dataPropertyName": "xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.xml",
+        "typeVersion": 1,
+        "position": [
+          -1440,
+          720
+        ],
+        "id": "78471b99-c1ea-46da-bc96-8b1e67db6fe7",
+        "name": "Parse Nmap XML (XML Node)1"
+      },
+      {
+        "parameters": {
+          "modelId": {
+            "__rl": true,
+            "value": "models/gemini-2.5-pro",
+            "mode": "list",
+            "cachedResultName": "models/gemini-2.5-pro"
+          },
+          "messages": {
+            "values": [
+              {
+                "content": "=You are an expert cybersecurity analyst. Your task is to generate a comprehensive vulnerability assessment report based on the provided Nmap scan data. The report MUST be formatted as a single, well-structured JSON object.\n\n*Input Data (Nmap XML parsed to JSON):*\n```json\n{{ JSON.stringify($json.nmaprun, null, 2) }}\n\nThe output MUST be a single JSON object with the following top-level keys. Each section should contain detailed information as described below.\n\n{\n  \"reportTitle\": \"Automated Network Vulnerability Assessment Report\",\n  \"executiveSummary\": \"string\",\n  \"scopeOfAssessment\": {\n    \"targetIp\": \"string\",\n    \"scanType\": \"string\",\n    \"scanDateTimeUTC\": \"string\",\n    \"scannerVersion\": \"string\"\n  },\n  \"identifiedServicesAndVulnerabilities\": [\n    {\n      \"portId\": \"number\",\n      \"protocol\": \"string\",\n      \"serviceName\": \"string\",\n      \"product\": \"string\",\n      \"version\": \"string\",\n      \"cpe\": [\"string\"],\n      \"commonFunctionDescription\": \"string\",\n      \"vulnerabilities\": [\n        {\n          \"name\": \"string\",\n          \"cveId\": \"string | null\",\n          \"description\": \"string\",\n          \"riskRating\": \"Critical | High | Medium | Low\",\n          \"justification\": \"string\",\n          \"references\": [\"string\"] // e.g., links to exploits, advisories\n        }\n      ]\n    }\n  ],\n  \"remediationRecommendations\": [\n    {\n      \"appliesTo\": \"string | string[]\", // e.g., \"Port 21/FTP\" or [\"vsftpd 2.3.4\", \"Samba smbd 3.x\"]\n      \"priority\": \"Critical | High | Medium | Low\",\n      \"recommendationTitle\": \"string\",\n      \"detailedSteps\": \"string\",\n      \"bestPractices\": [\"string\"] // general good practices for the service/vulnerability type\n    }\n  ],\n  \"conclusion\": \"string\"\n}\n\n\nDetailed Guidelines for Each JSON Section:\n\nreportTitle: A fixed string for the report title.\n\nexecutiveSummary: Provide a concise, high-level overview. Mention the most critical findings and the overall security posture (e.g., \"Several highly vulnerable services detected, requiring immediate attention\").\n\nscopeOfAssessment:\n\ntargetIp: Extract the primary IPv4 address of the scanned host.\n\nscanType: \"Nmap Comprehensive Scan\".\n\nscanDateTimeUTC: The startstr from the Nmap output (e.g., \"Fri Jul 25 20:35:30 2025\").\n\nscannerVersion: The Nmap version.\n\nidentifiedServicesAndVulnerabilities:\n\nIterate through each port object in the Nmap ports array where state is \"open\".\n\nFor each open port, populate portId, protocol, serviceName, product, version.\n\ncpe: List all CPE strings if available for the service.\n\ncommonFunctionDescription: Briefly explain what the service does (e.g., \"File Transfer Protocol server\").\n\nvulnerabilities: For each specific service/version, identify all known vulnerabilities.\n\nname: Common name of the vulnerability (e.g., \"vsftpd 2.3.4 Backdoor\").\n\ncveId: Relevant CVE ID (e.g., \"CVE-2011-2523\"). If none directly known, use null.\n\ndescription: A concise explanation of the vulnerability and its potential impact (e.g., \"Allows remote code execution due to backdoor inserted in specific vsftpd versions.\").\n\nriskRating: Assign Critical, High, Medium, or Low based on severity and exploitability.\n\njustification: Briefly explain why this risk rating was chosen (e.g., \"Remote code execution, highly exploitable\").\n\nreferences: Provide relevant links if applicable (e.g., NVD, Exploit-DB, vendor advisories).\n\nIf no specific vulnerability is found for a service, state \"No specific vulnerabilities identified for this version, but general security practices apply.\"\n\nInclude a section for OS vulnerabilities if detectable and relevant.\n\nremediationRecommendations:\n\nProvide actionable steps to fix or mitigate identified vulnerabilities, prioritizing Critical/High risks.\n\nappliesTo: Specify which port/service/vulnerability this recommendation addresses (e.g., \"Port 21/vsftpd 2.3.4\").\n\npriority: Inherit the highest risk rating from the vulnerability it addresses.\n\nrecommendationTitle: A clear title (e.g., \"Upgrade vsftpd to Latest Patched Version\").\n\ndetailedSteps: Provide granular, practical instructions (e.g., \"1. Backup configuration. 2. Download official vsftpd source from [link]. 3. Compile and install. 4. Configure securely. 5. Restart service. Alternatively, use system package manager if available and updated.\").\n\nbestPractices: List general security best practices relevant to the service (e.g., \"Implement strong password policies for SSH\", \"Disable unused services\").\n\nconclusion: Provide a summary of the assessment, emphasize the importance of immediate remediation for critical findings, and suggest next steps (e.g., regular scans, deeper manual testing).\n\nStrict Formatting Adherence:\n\nEnsure the output is ONLY the JSON object, with no conversational text or markdown outside the JSON.\n\nAll keys and string values within the JSON must be enclosed in double quotes.\n\nEscape any internal double quotes within string values using \\\".\n\nMaintain valid JSON syntax, including commas, brackets, and braces.\n\nDo NOT include any Markdown formatting like ## or * outside of string values if the content is part of a string.\n\nFor array fields, ensure correct array syntax []."
+              }
+            ]
+          },
+          "jsonOutput": true,
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.googleGemini",
+        "typeVersion": 1,
+        "position": [
+          -1248,
+          720
+        ],
+        "id": "7b60e341-7e2a-4453-8f8a-ccdf4b20c2e8",
+        "name": "Message a model1",
+        "credentials": {
+          "googlePalmApi": {
+            "id": "VSY1Y1QbhH50YaGx",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "command": "=docker exec kali nmap -sV -O -p- {{ $json.targetIp }} -oX /root/nmap_scan_results.xml"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          -2064,
+          720
+        ],
+        "id": "fa4cfd32-85a9-4e59-8c5d-f2575b708927",
+        "name": "Run Nmap Scan"
+      },
+      {
+        "parameters": {
+          "command": "=docker exec kali cat /root/nmap_scan_results.xml"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          -1856,
+          720
+        ],
+        "id": "26dddb9a-592c-4f7c-95b5-b1af761a8466",
+        "name": "Read Nmap XML Output"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Get the incoming data from the Gemini node\nconst geminiResponse = $input.item.json;\n\n// Extract the text string containing the report\nconst reportString = geminiResponse.content.parts[0].text;\n\n// Parse the string into a JSON object\nconst parsedReport = JSON.parse(reportString);\n\n// Return the parsed object for the next node\nreturn { json: parsedReport };"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -880,
+          720
+        ],
+        "id": "4c004b59-e682-4517-aa67-02b93725c29e",
+        "name": "JSON Format"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Get the parsed report from the previous node\nconst report = $input.item.json;\n\n// This array will hold each line of our Markdown report\nconst markdownLines = [];\n\n// --- Build Header and Summary ---\nmarkdownLines.push(# 🛡 ${report.reportTitle});\nmarkdownLines.push(\\n## Executive Summary);\nmarkdownLines.push(> ${report.executiveSummary.replace(/\\n/g, '\\n> ')}); // Add blockquote to each line\nmarkdownLines.push(\\n---);\n\n// --- Build Scope ---\nmarkdownLines.push(\\n## Scope of Assessment);\nmarkdownLines.push(* **Target IP:** \\${report.scopeOfAssessment.targetIp}\\`);\nmarkdownLines.push(* *Scan Type:* ${report.scopeOfAssessment.scanType});\nmarkdownLines.push(* *Scan Date (UTC):* ${report.scopeOfAssessment.scanDateTimeUTC});\nmarkdownLines.push(* *Scanner Version:* Nmap ${report.scopeOfAssessment.scannerVersion});\nmarkdownLines.push(\\n---);\n\n// --- Build Vulnerabilities Section ---\nmarkdownLines.push(\\n## 🚨 Identified Services & Vulnerabilities`);\nfor (const service of report.identifiedServicesAndVulnerabilities) {\n  markdownLines.push(\\n### Port ${service.portId}/${service.protocol} (${service.serviceName}) - ${service.product || 'Unknown'} ${service.version || ''});\n  markdownLines.push(* **Service Description:** ${service.commonFunctionDescription});\n  \n  if (service.vulnerabilities && service.vulnerabilities.length > 0) {\n    for (const vuln of service.vulnerabilities) {\n      let riskEmoji = '';\n      if (vuln.riskRating === 'Critical') riskEmoji = '🔴';\n      if (vuln.riskRating === 'High') riskEmoji = '🟠';\n      if (vuln.riskRating === 'Medium') riskEmoji = '🟡';\n\n      markdownLines.push(\\n#### Vulnerability: ${vuln.name});\n      markdownLines.push(* **Risk Rating:** **${vuln.riskRating}** ${riskEmoji});\n      if (vuln.cveId) {\n        markdownLines.push(* **CVE:** [${vuln.cveId}](https://nvd.nist.gov/vuln/detail/${vuln.cveId}));\n      } else {\n        markdownLines.push(* **CVE:** N/A);\n      }\n      markdownLines.push(> ${vuln.description});\n    }\n  }\n  markdownLines.push(\\n***);\n}\n\n// --- Build Recommendations Section ---\nmarkdownLines.push(\\n## ✅ Remediation Recommendations);\nfor (const rec of report.remediationRecommendations) {\n    let priorityEmoji = '';\n    if (rec.priority === 'Critical') priorityEmoji = '🔴';\n    if (rec.priority === 'High') priorityEmoji = '🟠';\n    if (rec.priority === 'Medium') priorityEmoji = '🟡';\n\n    markdownLines.push(\\n### ${rec.recommendationTitle});\n    markdownLines.push(* **Priority:** **${rec.priority}** ${priorityEmoji});\n    const appliesTo = Array.isArray(rec.appliesTo) ? rec.appliesTo.join(', ') : rec.appliesTo;\n    markdownLines.push(* **Applies To:** ${appliesTo});\n    markdownLines.push(\\n**Detailed Steps:**\\n${rec.detailedSteps});\n    if (rec.bestPractices && rec.bestPractices.length > 0) {\n        markdownLines.push(\\n**Best Practices:**);\n        rec.bestPractices.forEach(bp => markdownLines.push(* ${bp}));\n    }\n}\nmarkdownLines.push(\\n---);\n\n// --- Build Conclusion ---\nmarkdownLines.push(\\n## Conclusion);\nmarkdownLines.push(report.conclusion);\n\n// --- Final Output ---\n// Join all lines into a single string\nconst finalMarkdown = markdownLines.join('\\n');\n\n// Return the markdown in a new field for the next node to use\nreturn {\n  json: {\n    markdownReport: finalMarkdown\n  }\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -656,
+          720
+        ],
+        "id": "351b92b2-9900-4559-b09c-f48c635150e7",
+        "name": "Markdown"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "387c0fe0-e9be-46da-a14a-ee81cc671f94",
+                "name": "markdownReport",
+                "value": "={{ $json.markdownReport }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -448,
+          720
+        ],
+        "id": "f171f1f7-f125-47d4-9b45-047fd450b4a5",
+        "name": "Final Report"
+      }
+    ],
+    "connections": {
+      "Start Scan Trigger": {
+        "main": [
+          [
+            {
+              "node": "Extract Inputs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Inputs": {
+        "main": [
+          [
+            {
+              "node": "Route Scan Type",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Route Scan Type": {
+        "main": [
+          [
+            {
+              "node": "Run Nmap Scan",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      "Edit Fields": {
+        "main": [
+          [
+            {
+              "node": "Parse Nmap XML (XML Node)1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Nmap XML (XML Node)1": {
+        "main": [
+          [
+            {
+              "node": "Message a model1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Message a model1": {
+        "main": [
+          [
+            {
+              "node": "JSON Format",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Run Nmap Scan": {
+        "main": [
+          [
+            {
+              "node": "Read Nmap XML Output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Nmap XML Output": {
+        "main": [
+          [
+            {
+              "node": "Edit Fields",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "JSON Format": {
+        "main": [
+          [
+            {
+              "node": "Markdown",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Markdown": {
+        "main": [
+          [
+            {
+              "node": "Final Report",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Final Report": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true,
+      "instanceId": "67a894dfe4084470042176195d9acb336bc1d0af9d48e1768b30377faa8115bf"
+    }
+  }
