@@ -1,4 +1,4 @@
-# Pentesting Automation App
+# Network Pentesting Automation Workflow using LLM
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Node.js](https://img.shields.io/badge/Node.js-v16+-green.svg)
