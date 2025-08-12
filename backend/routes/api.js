@@ -1,31 +1,60 @@
 // backend/routes/api.js
 const express = require('express');
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-const PDFDocument = require('pdfkit');
+const fetch = require('node-fetch');
 const auth = require('../middleware/auth');
+const Scan = require('../models/Scan');
 const router = express.Router();
 
 router.post('/scan', auth, async (req, res) => {
-    const { target, scanType } = req.body;
-    const response = await fetch(process.env.N8N_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target, scanType })
-    });
-    const result = await response.json();
-    res.json(result);
+    try {
+        const { target, scanType } = req.body;
+        const startTime = new Date();
+
+        const response = await fetch(process.env.N8N_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ target, scanType })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`n8n workflow failed: ${errorText}`);
+        }
+
+        // --- THIS IS THE CORRECTED LOGIC ---
+        // 1. Parse the JSON object from the n8n response.
+        const n8nData = await response.json();
+
+        // 2. Extract the markdown string from the 'markdownReport' key.
+        const markdownReport = n8nData.markdownReport;
+        
+        const endTime = new Date();
+
+        // 3. Now, save the CLEAN markdown string to the database.
+        const newScan = new Scan({
+            userId: req.user.userId,
+            scanType: scanType,
+            startTime: startTime,
+            endTime: endTime,
+            markdownReport: markdownReport // This is now just the markdown, not the JSON string
+        });
+
+        await newScan.save();
+
+        res.status(201).json({ message: 'Scan completed and report saved.' });
+
+    } catch (error) {
+        console.error("Scan error:", error);
+        res.status(500).send('Error triggering or saving scan.');
+    }
 });
 
+// The old PDF route is no longer needed because we are using client-side printing.
+// You can safely delete it to keep your backend code clean.
+/*
 router.post('/report/pdf', auth, (req, res) => {
-    const { reportData } = req.body;
-    const doc = new PDFDocument();
-    let filename = `report-${Date.now()}.pdf`;
-    res.setHeader('Content-disposition', `attachment; filename=${filename}`);
-    res.setHeader('Content-type', 'application/pdf');
-    doc.fontSize(25).text('Penetration Test Report', { align: 'center' });
-    doc.fontSize(12).text(JSON.stringify(reportData, null, 2));
-    doc.pipe(res);
-    doc.end();
+    // ... This logic is now obsolete
 });
+*/
 
 module.exports = router;

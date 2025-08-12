@@ -1,77 +1,73 @@
 // frontend/src/pages/Login.jsx
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import AuthLayout from '../components/layout/AuthLayout';
+import { useNavigate } from 'react-router-dom';
+
+// Import our new layout and existing UI components
+import AuthFormLayout from '../components/layout/AuthFormLayout';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import Alert from '../components/ui/Alert';
 
-export default function Login() {
-    const [formData, setFormData] = useState({ email: '', password: '' });
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const navigate = useNavigate();
+export default function Login({ onSwitchToSignup, onClose }) {
+  // --- All existing state and logic remains untouched ---
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-    const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    // This is the new, correct handleSubmit function
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (response.ok) {
+        const { token } = await response.json();
+        localStorage.setItem('token', token);
+        navigate('/dashboard');
+      } else {
+        const errorData = await response.text();
+        setError(errorData || 'Invalid email or password.');
+      }
+    } catch (err) {
+      setError('Could not connect to the server.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        try {
-            // Send the real login request to your backend API
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData) // Send the user's email and password
-            });
+  // --- The JSX is updated to use the new layout and styling ---
+  return (
+    <AuthFormLayout
+      title="Welcome Back"
+      subtitle="Log in to continue to the platform."
+      onClose={onClose}
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-4">
+          <Input id="email" name="email" type="email" placeholder="you@example.com" required onChange={handleChange} value={formData.email} />
+          <Input id="password" name="password" type="password" placeholder="••••••••" required onChange={handleChange} value={formData.password} />
+        </div>
 
-            if (response.ok) {
-                // If the backend says credentials are valid...
-                const { token } = await response.json(); // Get the real JWT
-                localStorage.setItem('token', token);   // Store it
-                navigate('/dashboard');                 // Go to the dashboard
-            } else {
-                // If the backend says credentials are bad...
-                const errorData = await response.text();
-                setError(errorData || 'Invalid email or password.');
-            }
-        } catch (err) {
-            // If the fetch itself fails (e.g., server is down)
-            setError('Could not connect to the server. Please try again later.');
-        } finally {
-            // This always runs, ensuring the spinner stops
-            setIsLoading(false);
-        }
-    };
+        {error && <Alert message={error} type="error" />}
 
-    return (
-        <AuthLayout title="Log in to your account">
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-1">
-                    <label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                    <Input id="email" name="email" type="email" placeholder="you@example.com" required onChange={handleChange} value={formData.email} />
-                </div>
-                <div className="space-y-1">
-                    <label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-                    <Input id="password" name="password" type="password" placeholder="••••••••" required onChange={handleChange} value={formData.password} />
-                </div>
+        <Button type="submit" isLoading={isLoading} className="w-full bg-sky-600 hover:bg-sky-500">
+          Sign In
+        </Button>
 
-                <Alert message={error} type="error" />
-
-                <Button type="submit" isLoading={isLoading}>
-                    Sign In
-                </Button>
-
-                <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-                    Don't have an account?{' '}
-                    <Link to="/signup" className="font-semibold text-blue-600 hover:underline">
-                        Sign up
-                    </Link>
-                </p>
-            </form>
-        </AuthLayout>
-    );
+        <p className="text-center text-sm text-slate-600 dark:text-slate-400">
+          Don't have an account?{' '}
+          <button type="button" onClick={onSwitchToSignup} className="font-semibold text-sky-600 hover:underline dark:text-sky-400">
+            Sign up
+          </button>
+        </p>
+      </form>
+    </AuthFormLayout>
+  );
 }

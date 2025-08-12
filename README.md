@@ -307,10 +307,4 @@ sudo certbot --nginx -d your-domain.com
 
 **Security Note**: Never commit secrets to the repository. Run `npm audit` to check for vulnerabilities.
 
-## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## Documentation
-
-For detailed documentation, including N8N workflow setup, API details, and architecture, refer to [Pentesting_Automation_Documentation.md](Pentesting_Automation_Documentation.md).
