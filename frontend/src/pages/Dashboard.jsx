@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { useReactToPrint } from 'react-to-print';
 import { useNavigate } from 'react-router-dom';
 import { DocumentMagnifyingGlassIcon, SunIcon, MoonIcon, ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../hooks/useTheme';
@@ -33,10 +32,6 @@ export default function Dashboard() {
     const { theme, toggleTheme } = useTheme();
     const token = localStorage.getItem('token');
     const reportRef = useRef();
-    const handlePrint = useReactToPrint({
-        content: () => reportRef.current,
-        documentTitle: `pentest-report-${Date.now()}`,
-    });
 
     // --- API Fetching ---
     const fetchScans = async () => {
@@ -121,13 +116,26 @@ export default function Dashboard() {
         }
     };
     
-    const handleDownloadPdf = () => {
-        if (!markdownContent || !selectedScanId) {
-            alert("Please select a scan from the history to generate a report.");
-            return;
-        }
-        handlePrint();
-    };
+// in Dashboard.js
+const handleDownloadPdf = async (scanId) => {
+  try {
+    const res = await fetch(`/api/scans/${scanId}/report-pdf`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error("Failed to download PDF");
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `report-${scanId}.pdf`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -195,7 +203,7 @@ export default function Dashboard() {
                                     <MarkdownViewer 
                                         markdownContent={markdownContent} 
                                         onClear={() => setSelectedScanId(null)}
-                                        onDownloadPdf={handleDownloadPdf}
+                                        onDownloadPdf={() => selectedScanId && handleDownloadPdf(selectedScanId)}
                                     />
                                 )}
                             </div>

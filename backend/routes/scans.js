@@ -2,6 +2,8 @@
 const express = require('express');
 const Scan = require('../models/Scan');
 const auth = require('../middleware/auth'); // We must protect these routes
+const PDFDocument = require('pdfkit');
+
 const router = express.Router();
 
 // --- GET /api/scans ---
@@ -37,6 +39,35 @@ router.get('/scans/:id/report', auth, async (req, res) => {
     res.json({ markdownReport: scan.markdownReport });
   } catch (err) {
     res.status(500).send('Error fetching scan report.');
+  }
+});
+
+router.get('/scans/:id/report-pdf', auth, async (req, res) => {
+  try {
+    const scan = await Scan.findById(req.params.id);
+    if (!scan || scan.userId.toString() !== req.user.userId) {
+      return res.status(404).send('Scan report not found.');
+    }
+
+    const doc = new PDFDocument();
+    res.setHeader('Content-Disposition', `attachment; filename=report-${scan._id}.pdf`);
+    res.setHeader('Content-Type', 'application/pdf');
+    doc.pipe(res);
+
+    doc.fontSize(20).text('Pentest Report', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(12).text(`Scan Type: ${scan.scanType}`);
+    doc.text(`Start Time: ${scan.startTime}`);
+    doc.text(`End Time: ${scan.endTime}`);
+    doc.moveDown();
+    doc.fontSize(14).text('Report:', { underline: true });
+    doc.moveDown();
+    doc.fontSize(12).text(scan.markdownReport || 'No report available.');
+
+    doc.end();
+  } catch (err) {
+    console.error('PDF generation error:', err);
+    res.status(500).send('Error generating PDF report.');
   }
 });
 

@@ -1,6 +1,10 @@
-/* frontend/src/index.css */
-
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-mint-500: oklch(0.72 0.11 178);
+}
 
 @layer base {
   body {
